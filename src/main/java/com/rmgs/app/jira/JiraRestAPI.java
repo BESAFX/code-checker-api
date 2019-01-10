@@ -28,7 +28,7 @@ public class JiraRestAPI {
     @PostConstruct
     public void init() {
         restTemplate = new RestTemplate();
-        String plainCreds = "bassam.mahdy:P@$$w0rd";
+        String plainCreds = "bassam.mahdy@flairstech.com:besa2009";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
         String base64Creds = new String(base64CredsBytes);

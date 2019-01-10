@@ -7,6 +7,9 @@ import com.rmgs.app.config.CustomException;
 import com.rmgs.app.dao.ProjectDao;
 import com.rmgs.app.model.Project;
 import com.rmgs.app.sonar.SonarController;
+import com.rmgs.app.ws.Notification;
+import com.rmgs.app.ws.NotificationService;
+import com.rmgs.app.ws.NotificationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,9 @@ public class ProjectRestAPIs {
     private SonarController sonarController;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private ProjectDao projectDao;
 
     @PostMapping("/api/project")
@@ -31,6 +37,14 @@ public class ProjectRestAPIs {
         projectDao.findByProjKey(project.getProjKey()).ifPresent(val -> new CustomException("Project Key exist"));
         sonarController.createProject(project);
         project = projectDao.save(project);
+        notificationService.notifyAll(Notification
+                .builder()
+                .title("Project")
+                .message("Project Created Successfully")
+                .type(NotificationType.information)
+                .icon("add")
+                .build()
+        );
         return SquigglyUtils.stringify(Squiggly.init(new ObjectMapper(), FILTER_TABLE), project);
     }
 
