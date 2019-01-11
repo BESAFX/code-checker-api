@@ -5,8 +5,11 @@ import com.rmgs.app.dao.UserDao;
 import com.rmgs.app.dto.JwtResponse;
 import com.rmgs.app.dto.LoginForm;
 import com.rmgs.app.jwt.JwtProvider;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,7 +22,12 @@ import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(value = "/api/auth")
+@Api(
+        value = "/api/auth",
+        description = "Authorization REST API with JSON Web Token",
+        tags = {"Authorization (Using JSON Web Token)"}
+)
 public class AuthRestAPIs {
 
     @Autowired
@@ -38,16 +46,25 @@ public class AuthRestAPIs {
     JwtProvider jwtProvider;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginRequest) {
-
+    @ApiOperation(
+            nickname = "authenticateUser",
+            value = "Generating Token",
+            notes = "You must use this call before other calls to generate token required for authentication, where token type is Bearer.",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @ResponseBody
+    public JwtResponse authenticateUser(
+            @ApiParam(value = "Try filling required fields with login credentials.", required = true)
+            @Valid @RequestBody LoginForm loginRequest
+    ) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String jwt = jwtProvider.generateJwtToken(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        return ResponseEntity.ok(new JwtResponse(jwt, "Bearer", userDetails.getUsername(), userDetails.getAuthorities()));
+        return new JwtResponse(jwt, "Bearer", userDetails.getUsername(), userDetails.getAuthorities());
     }
+
+
 }

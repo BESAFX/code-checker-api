@@ -10,12 +10,22 @@ import com.rmgs.app.sonar.SonarController;
 import com.rmgs.app.ws.Notification;
 import com.rmgs.app.ws.NotificationService;
 import com.rmgs.app.ws.NotificationType;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@RequestMapping(value = "/api/project")
+@Api(
+        value = "/api/project",
+        description = "Projects REST API",
+        tags = {"Rest API - Projects"}
+)
 public class ProjectRestAPIs {
 
     private final String FILTER_TABLE = "**";
@@ -29,10 +39,20 @@ public class ProjectRestAPIs {
     @Autowired
     private ProjectDao projectDao;
 
-    @PostMapping("/api/project")
+    @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_VIEW_PROJECTS_PRIVILEGE')")
     @ResponseBody
-    public String create(@RequestBody Project project) {
+    @ApiOperation(
+            nickname = "createProject",
+            value = "",
+            notes = "Create New Project - Required Authorities",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public String create(
+            @ApiParam(value = "Project Information", required = true)
+            @RequestBody Project project
+    ) {
         projectDao.findByName(project.getName()).ifPresent(val -> new CustomException("Project name exist"));
         projectDao.findByProjKey(project.getProjKey()).ifPresent(val -> new CustomException("Project Key exist"));
         sonarController.createProject(project);
@@ -48,10 +68,16 @@ public class ProjectRestAPIs {
         return SquigglyUtils.stringify(Squiggly.init(new ObjectMapper(), FILTER_TABLE), project);
     }
 
-    @GetMapping("/api/project/findAll")
+    @GetMapping("/findAll")
     @PreAuthorize("hasRole('ROLE_VIEW_PROJECTS_PRIVILEGE')")
     @ResponseBody
-    public String userAccess() {
+    @ApiOperation(
+            nickname = "getAllProjects",
+            value = "",
+            notes = "Find All Projects - Required Authorities",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public String findAll() {
         return SquigglyUtils.stringify(Squiggly.init(new ObjectMapper(), FILTER_TABLE), projectDao.findAll());
     }
 }
