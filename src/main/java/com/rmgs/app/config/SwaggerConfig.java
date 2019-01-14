@@ -102,9 +102,9 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .tags(
                         new Tag("Authorization (Using JSON Web Token)", "", 1),
                         new Tag("JIRA Integration", "", 2),
-                        new Tag("Sonar Cube Integration", "Under Construction", 3),
-                        new Tag("Rest API - Users", "Under Construction", 4),
-                        new Tag("Rest API - Projects", "Under Construction", 5)
+                        new Tag("Sonar Cube Integration", "<p style=\"color: #e53935; font-weight:bold\">Under Construction</p>", 3),
+                        new Tag("Rest API - Users", "<p style=\"color: #e53935; font-weight:bold\">Under Construction</p>", 4),
+                        new Tag("Rest API - Projects", "<p style=\"color: #e53935; font-weight:bold\">Under Construction</p>", 5)
                 );
 
         docket = docket
