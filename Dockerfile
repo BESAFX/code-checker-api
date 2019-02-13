@@ -1,20 +1,20 @@
-# Create image based on lightwight JRE 
-FROM openjdk:8-jre-alpine
+#---------------------------------------------------------#
+#                                                         #
+# Stage 1: Build Image                                    #
+#                                                         #
+#---------------------------------------------------------#
+FROM maven:3.5.2-jdk-9 AS builder
+COPY . /usr/src/app/
+WORKDIR /usr/src/app/  
+RUN mvn clean package -DskipTests -Djavax.net.ssl.trustStorePassword=changeit
 
-# Set developer information
-MAINTAINER Bassam Almahdy
-
-# Assgin variable for build location
-ARG JAR_FILE=/target/api.jar
-
-# Copy this build to root directory of image 
-COPY ${JAR_FILE} api.jar
-
-# Set entery point of excution 
-ENTRYPOINT ["/usr/bin/java"]
-
-# Terminal command for running service 
-CMD ["-jar", "api.jar"]
-
-# Set export port to browse application 
+#---------------------------------------------------------#
+#                                                         #
+# Stage 2: Create Container Executable                    #
+#                                                         #
+#---------------------------------------------------------#
+FROM openjdk:9
+WORKDIR /root/
+COPY --from=builder /usr/src/app/target/app.jar . 
 EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "./app.jar"]
